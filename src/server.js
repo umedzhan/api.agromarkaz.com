@@ -19,7 +19,7 @@ app.use(express.json());
 
 // Enable CORS
 app.use(cors({
-    origin: 'https://agromarkaz.com', // faqat shu domendan qabul qiladi
+    origin: ['https://agromarkaz.com', 'http://localhost:5173'], // faqat shu domendan qabul qiladi
     credentials: true
 }));
 
