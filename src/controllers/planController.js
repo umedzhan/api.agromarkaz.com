@@ -93,7 +93,7 @@ Suv mavjudligi: ${suv_mavjudligi}`;
                 }
             ],
             temperature: 0.4,
-            max_completion_tokens: 100000,
+            max_completion_tokens: 200000,
         });
 
         const rawContent = response.choices[0]?.message?.content?.trim() || '[]';
