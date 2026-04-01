@@ -26,6 +26,7 @@ app.use(cors({
 // Mount routers
 app.use('/api/auth', authRoutes);
 app.use('/api/weather', require('./routes/weatherRoutes'));
+app.use('/api/chatai', require('./routes/chatRoutes'));
 
 // Error handling middleware (very basic)
 app.use((err, req, res, next) => {
