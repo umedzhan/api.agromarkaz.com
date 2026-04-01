@@ -41,25 +41,29 @@ Each crop object must follow this exact structure:
 {
   "ekin_nomi": "string",
   "moslik_darajasi": "yuqori" | "o'rtacha" | "past",
-  "tavsif": "Qisqa va aniq tavsif (1-2 jumla, o'zbek tilida)",
+  "tavsif": "Qisqa va aniq tavsif (1-2 jumla, o‘zbek tilida)",
   "xarajat": {
     "umumiy_so'm_1_gektar": number,
-    "tavsif": "Asosiy xarajatlar taqsimoti (urug', o'g'it, yoqilg'i, ish haqi va boshqalar) - o'zbek tilida"
+    "tavsif": "Asosiy xarajatlar taqsimoti (urug‘, o‘g‘it, yoqilg‘i, ish haqi va boshqalar) - o‘zbek tilida"
   },
   "mehnat_xarajati": {
     "ish_kunlari_1_gektar": number,
-    "tavsif": "Mehnat talabi haqida qisqa izoh - o'zbek tilida"
+    "tavsif": "Mehnat talabi haqida qisqa izoh - o‘zbek tilida"
   },
   "suv_talabi": {
     "m3_gektar_yil": number,
-    "tavsif": "Suv sarfi haqida qisqa izoh - o'zbek tilida"
+    "tavsif": "Suv sarfi haqida qisqa izoh - o‘zbek tilida"
   },
   "prognoz_hosil": "string (masalan: '45-60 tonna/gektar')",
+  "hosildorlik_tahlili": {
+    "ortacha_hosil_tonna_gektar": number,
+    "tahlil": "Tahminiy hosildan hosildorlikning batafsil tahlili: asosiy omillar (tuproq, suv, iqlim), xavf-xatarlar, hosildorlikni oshirish choralari - o‘zbek tilida"
+  },
   "taxminiy_foyda_so'm_gektar": number,
-  "eslatmalar": "Muhim maslahatlar, xavf-xatarlar, optimal ekish vaqti va boshqa amaliy tavsiyalar - o'zbek tilida"
+  "eslatmalar": "Muhim maslahatlar, xavf-xatarlar, optimal ekish vaqti va boshqa amaliy tavsiyalar - o‘zbek tilida"
 }
 
-All monetary values must be in Uzbek Som (so'm) and based on current real market prices in Uzbekistan. Forecasts must be realistic and practical for the given soil, water and region.
+All monetary values must be in Uzbek Som (so‘m) and based on current real market prices in Uzbekistan. Forecasts and yield analysis must be realistic and practical for the given soil, water and region.
 
 Output format example:
 [
@@ -68,7 +72,8 @@ Output format example:
   ...
 ]
 
-Never break this rule. Always return only the JSON array.`;
+Never break this rule. Always return only the JSON array.
+`;
 
         const userPrompt = `Hudud: ${hudud}
 Yer hajmi: ${yer_hajmi}
