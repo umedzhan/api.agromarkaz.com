@@ -96,7 +96,7 @@ Suv mavjudligi: ${suv_mavjudligi}${oldingi_hosil ? `\nOldingi hosil: ${oldingi_h
                 }
             ],
             temperature: 0.4,
-            max_completion_tokens: 200000,
+            max_completion_tokens: 128000,
         });
 
         const rawContent = response.choices[0]?.message?.content?.trim() || '[]';
