@@ -3,33 +3,32 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 
-// Load env vars
 dotenv.config();
 
-// Require routes
 const authRoutes = require('./routes/authRoutes');
-
-// Connect to database
-// Note: We don't call this right away, let's call it just before starting the server.
 
 const app = express();
 
 // Body parser
 app.use(express.json());
 
-// Enable CORS
+// CORS
 app.use(cors({
-    origin: ['https://agromarkaz.com', 'https://www.agromarkaz.com', 'http://localhost:5173'], // faqat shu domendan qabul qiladi
+    origin: [
+        'https://agromarkaz.com',
+        'https://www.agromarkaz.com',
+        'http://localhost:5173'
+    ],
     credentials: true
 }));
 
-// Mount routers
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/weather', require('./routes/weatherRoutes'));
 app.use('/api/chatai', require('./routes/chatRoutes'));
 app.use('/api/aiplan', require('./routes/planRoutes'));
 
-// Error handling middleware (very basic)
+// Error handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(err.statusCode || 500).json({
@@ -40,9 +39,17 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Connect to DB then start server
+// 🔥 ENG MUHIM QISM
 connectDB().then(() => {
-    app.listen(PORT, console.log(`Server running on port ${PORT}`));
+    const server = app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+
+    // 🔥 TIMEOUTLARNI OSHIRAMIZ
+    server.timeout = 300000;           // 5 minut
+    server.keepAliveTimeout = 300000;  // 5 minut
+    server.headersTimeout = 310000;    // keepAlive'dan katta bo'lishi kerak
+
 }).catch(err => {
     console.log(err);
 });
