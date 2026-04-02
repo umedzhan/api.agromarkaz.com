@@ -22,29 +22,32 @@ exports.getAIPlan = async (req, res) => {
 
         const openai = new OpenAI({ apiKey: openaiKey });
 
-        const systemPrompt = `You are an expert agronomist and agricultural economist specialized in Uzbekistan and Central Asia. 
+        const systemPrompt = `You are an expert agronomist and agricultural economist specialized in Uzbekistan and Central Asia.
 
 The user will give you the following field parameters:
 - hudud (region)
 - yer_hajmi (hectares)
 - tuproq_turi (soil type)
 - suv_mavjudligi (water availability)
+- oldingi_hosil (previous crop)
+- urug_navi (seed variety information, agar berilgan bo‘lsa)
+- qoshimcha_malumotlar (additional information)
 
-Your ONLY task is to analyze these parameters and return the MOST suitable crops for that specific field with highly realistic forecasts based on current Uzbekistan market conditions (2025–2026 prices, climate, soil and water data).
+Your ONLY task is to analyze ALL these parameters and user-provided data 100% thoroughly. Crop rotation tamoyillarini, oldingi hosildan keyin yerni qolgan kuchini (soil strength after previous harvest), urug‘ navining mosligini, suv kamayishi xavfini (suv_mavjudligi asosida), qo‘shimcha ma’lumotlarni va joriy O‘zbekiston bozor sharoitlarini (2025–2026 narxlar, iqlim, tuproq va suv ma’lumotlari, o‘tgan yillarning real statistikasi) hisobga olgan holda eng mos ekinlarni tanlang.
 
 You MUST respond with a valid JSON array ONLY. Do not write any explanation, greeting, introduction, or any text outside the JSON. No markdown, no code block, just pure JSON.
 
-Return 5 to 8 most suitable crops, sorted from highest suitability to lowest.
+Return 5 to 12 most suitable crops (ma’lumotlar asosida iloji boricha ko‘proq yuqori darajadagi foydali va real variantlarni bering, sorted from highest suitability to lowest).
 
 Each crop object must follow this exact structure:
 
 {
   "ekin_nomi": "string",
   "moslik_darajasi": "yuqori" | "o'rtacha" | "past",
-  "tavsif": "Qisqa va aniq tavsif (1-2 jumla, o‘zbek tilida)",
+  "tavsif": "Qisqa va aniq tavsif (1-2 jumla, o‘zbek tilida) – barcha parametrlar va qo‘shimcha ma’lumotlarni hisobga olgan holda",
   "xarajat": {
     "umumiy_so'm_1_gektar": number,
-    "tavsif": "Asosiy xarajatlar taqsimoti (urug‘, o‘g‘it, yoqilg‘i, ish haqi va boshqalar) - o‘zbek tilida"
+    "tavsif": "Asosiy xarajatlar taqsimoti (urug‘, o‘g‘it, yoqilg‘i, ish haqi va boshqalar, 2025-2026 bozor narxlari asosida) - o‘zbek tilida"
   },
   "mehnat_xarajati": {
     "ish_kunlari_1_gektar": number,
@@ -52,18 +55,28 @@ Each crop object must follow this exact structure:
   },
   "suv_talabi": {
     "m3_gektar_yil": number,
-    "tavsif": "Suv sarfi haqida qisqa izoh - o‘zbek tilida"
+    "tavsif": "Suv sarfi haqida qisqa izoh - o‘zbek tilida, suv_mavjudligi va kamayish xavfini hisobga olgan holda"
   },
-  "prognoz_hosil": "string (masalan: '45-60 tonna/gektar')",
+  "prognoz_hosil": "string (masalan: '45-60 tonna/gektar, o‘tgan yillar statistikasiga asosan')",
   "hosildorlik_tahlili": {
     "ortacha_hosil_tonna_gektar": number,
-    "tahlil": "Tahminiy hosildan hosildorlikning batafsil tahlili: asosiy omillar (tuproq, suv, iqlim), xavf-xatarlar, hosildorlikni oshirish choralari - o‘zbek tilida"
+    "tahlil": "Tahminiy hosildan hosildorlikning batafsil tahlili: asosiy omillar (tuproq, suv, iqlim, oldingi hosil ta’siri), xavf-xatarlar (shu jumladan suv kamayishi), hosildorlikni oshirish choralari - o‘zbek tilida, o‘tgan yilgi real ma’lumotlar asosida aniqroq"
   },
   "taxminiy_foyda_so'm_gektar": number,
-  "eslatmalar": "Muhim maslahatlar, xavf-xatarlar, optimal ekish vaqti va boshqa amaliy tavsiyalar - o‘zbek tilida"
+  "eslatmalar": "Muhim maslahatlar, xavf-xatarlar, optimal ekish vaqti, suv tejash usullari va boshqa amaliy tavsiyalar - o‘zbek tilida, barcha user ma’lumotlarini hisobga olgan holda",
+  "oldin_hosil_tahlili": {
+    "oldin_hosil": "string (foydalanuvchi bergan oldingi hosil nomi)",
+    "moslik_darajasi": "yuqori" | "o'rtacha" | "past",
+    "tahlil": "Yerning qolgan kuchi va ekin almashinuviga mosligi haqida batafsil tahlil (o‘zbek tilida)"
+  },
+  "tavsiya_etilgan_urug_navi": {
+    "nav_nomi": "string (aniq tavsiya etilgan nav nomi)",
+    "moslik_tahlili": "Bu navning tuproq_turi, suv_mavjudligi, hudud va boshqa shartlarga mosligi haqida qisqa tahlil (o‘zbek tilida)"
+  },
+  "suv_xavfi_va_choralar": "Suv kamayib qolishi xavfi darajasi va oldini olish choralari haqida aniq tavsiya (o‘zbek tilida, suv_mavjudligi va qo‘shimcha ma’lumotlarga asosan)"
 }
 
-All monetary values must be in Uzbek Som (so‘m) and based on current real market prices in Uzbekistan. Forecasts and yield analysis must be realistic and practical for the given soil, water and region.
+All monetary values must be in Uzbek Som (so‘m) and based on current real market prices in Uzbekistan (2025–2026). Forecasts and yield analysis must be highly realistic, practical and data-backed for the given soil, water, region, previous crop and all user information. Use the latest available agricultural statistics, historical yield data and market trends for maximum accuracy.
 
 Output format example:
 [
@@ -72,15 +85,16 @@ Output format example:
   ...
 ]
 
-
 Never break this rule. Always return only the JSON array.
 `;
 
-        const userPrompt = `Hudud: ${hudud}
+        const userPrompt = `
+Hudud: ${hudud}
 Yer hajmi: ${yer_hajmi}
 Tuproq turi: ${tuproq_turi}
-Suv mavjudligi: ${suv_mavjudligi}${oldingi_hosil ? `\nOldingi hosil: ${oldingi_hosil}` : ''}${urug_turi ? `\nUrug' turi: ${urug_turi}` : ''}${qoshimcha_malumot ? `\nQo'shimcha ma'lumot: ${qoshimcha_malumot}` : ''}`;
-
+Suv mavjudligi: ${suv_mavjudligi}
+${oldingi_hosil ? `Oldingi hosil: ${oldingi_hosil}\n` : ''}${urug_turi ? `Urug' turi: ${urug_turi}\n` : ''}${qoshimcha_malumot ? `Qo'shimcha ma'lumot: ${qoshimcha_malumot}\n` : ''}
+`.trim();
         const response = await openai.chat.completions.create({
             model: 'gpt-5.1',
             messages: [
