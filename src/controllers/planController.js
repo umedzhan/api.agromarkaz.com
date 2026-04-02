@@ -5,7 +5,7 @@ const OpenAI = require('openai');
 // @access  Private
 exports.getAIPlan = async (req, res) => {
     try {
-        const { hudud, yer_hajmi, tuproq_turi, suv_mavjudligi } = req.body;
+        const { hudud, yer_hajmi, tuproq_turi, suv_mavjudligi, oldingi_hosil, urug_turi, qoshimcha_malumot } = req.body;
 
         // Validatsiya
         if (!hudud || !yer_hajmi || !tuproq_turi || !suv_mavjudligi) {
@@ -78,7 +78,7 @@ Never break this rule. Always return only the JSON array.
         const userPrompt = `Hudud: ${hudud}
 Yer hajmi: ${yer_hajmi}
 Tuproq turi: ${tuproq_turi}
-Suv mavjudligi: ${suv_mavjudligi}`;
+Suv mavjudligi: ${suv_mavjudligi}${oldingi_hosil ? `\nOldingi hosil: ${oldingi_hosil}` : ''}${urug_turi ? `\nUrug' turi: ${urug_turi}` : ''}${qoshimcha_malumot ? `\nQo'shimcha ma'lumot: ${qoshimcha_malumot}` : ''}`;
 
         const response = await openai.chat.completions.create({
             model: 'gpt-5.1',
@@ -121,7 +121,7 @@ Suv mavjudligi: ${suv_mavjudligi}`;
 
         res.status(200).json({
             success: true,
-            input: { hudud, yer_hajmi, tuproq_turi, suv_mavjudligi },
+            input: { hudud, yer_hajmi, tuproq_turi, suv_mavjudligi, oldingi_hosil, urug_turi, qoshimcha_malumot },
             recommendations: parsed
         });
 
