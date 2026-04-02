@@ -70,7 +70,10 @@ Output format example:
   {first crop object},
   {second crop object},
   ...
+  {five crop object}
 ]
+
+Only 5 object
 
 Never break this rule. Always return only the JSON array.
 `;
